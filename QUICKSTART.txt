@@ -1,0 +1,99 @@
+========================================
+PROPERTY VALUE ENHANCER - QUICK START
+========================================
+
+STEP 1: Open PowerShell in this folder
+----------------------------------------
+Right-click on the project folder → "Open in Terminal"
+
+STEP 2: Install Dependencies
+-----------------------------
+npm install
+
+STEP 3: Start Development Server
+---------------------------------
+npm run dev
+
+STEP 4: Open Browser
+--------------------
+The app will automatically open at: http://localhost:5173
+
+If it doesn't open automatically, copy the URL from terminal.
+
+========================================
+TROUBLESHOOTING
+========================================
+
+Problem: "npm : File cannot be loaded because running scripts is disabled"
+Solution: Run PowerShell as Administrator and execute:
+          Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+Problem: Port 5173 is already in use
+Solution: Vite will automatically use another port. Check terminal for the URL.
+
+Problem: Dependencies not installing
+Solution: Delete node_modules folder and package-lock.json, then run npm install again
+
+========================================
+NAVIGATION GUIDE
+========================================
+
+Use the Quick Navigation panel (top-right) to jump between pages:
+- Landing → Not used (goes to Dashboard)
+- Dashboard → Main user dashboard with property cards
+- Submit → Property submission form
+- Recommendations → View personalized improvement ideas
+- Admin → Admin panel to manage recommendations
+
+Or use the Sidebar (left) on most pages:
+- Dashboard
+- My Properties
+- Recommendations
+- Saved Ideas
+- Profile
+
+========================================
+KEY FEATURES TO TEST
+========================================
+
+1. DASHBOARD
+   - Click "Submit New Property" button
+   - Click "View Recommendations" button
+   - View sample property cards
+
+2. SUBMIT FORM
+   - Select city from dropdown
+   - Click on property type cards (Apartment/Villa/House)
+   - Check amenities boxes
+   - Fill all fields and submit
+
+3. RECOMMENDATIONS
+   - Use filter dropdowns (Budget, Area, Type)
+   - Click heart icon to save/unsave ideas
+   - Click "View Detailed Guide" button
+
+4. ADMIN DASHBOARD
+   - View stats cards
+   - Click "Approve" or "Reject" on pending submissions
+   - Click "Add New Recommendation" button
+   - Edit or Delete existing recommendations
+
+========================================
+DATA STORAGE
+========================================
+
+All data is stored in browser localStorage:
+- To clear data: Open browser console (F12) and type:
+  localStorage.clear()
+  Then refresh the page.
+
+========================================
+NEED HELP?
+========================================
+
+Check these files:
+- README.md → Project overview
+- SETUP.md → Detailed setup instructions
+- PROJECT_SUMMARY.md → Complete feature list and technical details
+
+========================================

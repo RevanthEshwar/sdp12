@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* App base styles */
+:root {
+  --radius: 10px;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+.container-responsive {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.btn-primary {
+  @apply inline-flex items-center gap-2 rounded-md bg-brand-600 px-4 py-2 text-white shadow-md hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-400 transition;
+}
+
+.card {
+  @apply bg-white rounded-xl shadow-sm ring-1 ring-slate-200;
+}
+
+.input {
+  @apply w-full rounded-md border-slate-300 focus:border-brand-500 focus:ring-brand-500;
+}
