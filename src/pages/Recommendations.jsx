@@ -1,22 +1,31 @@
-import React, { useContext, useMemo, useState } from 'react'
+import React, { useContext, useMemo, useState, useEffect } from 'react'
 import { AppContext } from '../App.jsx'
+import { apiService } from '../services/api'
 
 export default function Recommendations() {
   const { recommendations, saved, setSaved, form } = useContext(AppContext)
   const [budgetFilter, setBudgetFilter] = useState('All Budgets')
   const [areaFilter, setAreaFilter] = useState('All Areas')
   const [typeFilter, setTypeFilter] = useState('All Types')
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    const fetchRecommendations = async () => {
+      setIsLoading(true)
+      const response = await apiService.recommendations.getRecommendations(form)
+      setIsLoading(false)
+    }
+    fetchRecommendations()
+  }, [form])
 
   const filtered = useMemo(() => {
     let list = [...recommendations]
     
-    // Filter by budget
     if (budgetFilter !== 'All Budgets') {
       const maxBudget = parseInt(budgetFilter)
       list = list.filter((r) => (r.costRange?.max || 0) <= maxBudget)
     }
     
-    // Filter by area
     if (areaFilter !== 'All Areas') {
       list = list.filter((r) => {
         const title = r.title.toLowerCase()
@@ -26,7 +35,6 @@ export default function Recommendations() {
       })
     }
     
-    // Filter by type
     if (typeFilter !== 'All Types') {
       list = list.filter((r) => r.category === typeFilter)
     }
@@ -129,7 +137,20 @@ export default function Recommendations() {
       </div>
 
       <div className="space-y-4">
-        {filtered.map((item) => {
+        {isLoading && (
+          <div className="text-center py-8">
+            <div className="inline-block">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              <p className="text-slate-600 mt-2">Loading recommendations...</p>
+            </div>
+          </div>
+        )}
+        {!isLoading && filtered.length === 0 && (
+          <div className="text-center py-8">
+            <p className="text-slate-600">No recommendations found</p>
+          </div>
+        )}
+        {!isLoading && filtered.map((item) => {
           const impact = getImpactBadge(item.category)
           const icon = getIconForCategory(item.category)
           const bgColor = getColorForCategory(item.category)

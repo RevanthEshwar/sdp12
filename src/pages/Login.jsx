@@ -1,9 +1,11 @@
 import React, { useState, useContext } from 'react'
 import { AppContext } from '../App.jsx'
+import { apiService } from '../services/api'
 
 export default function Login() {
   const { navigate, setUser } = useContext(AppContext)
   const [isLogin, setIsLogin] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -17,54 +19,55 @@ export default function Login() {
     setError('')
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+    setIsLoading(true)
 
-    if (isLogin) {
-      // Login logic
-      const users = JSON.parse(localStorage.getItem('pve:users') || '[]')
-      const user = users.find(u => u.email === formData.email && u.password === formData.password)
-      
-      if (user) {
-        localStorage.setItem('pve:currentUser', JSON.stringify(user))
-        setUser(user)
+    try {
+      if (isLogin) {
+        const response = await apiService.auth.login(formData.email, formData.password)
+        
+        if (!response.success) {
+          setError(response.error)
+          return
+        }
+
+        localStorage.setItem('pve:currentUser', JSON.stringify(response.data.user))
+        localStorage.setItem('pve:authToken', response.data.token)
+        setUser(response.data.user)
         navigate('/')
       } else {
-        setError('Invalid email or password')
-      }
-    } else {
-      // Signup logic
-      if (formData.password !== formData.confirmPassword) {
-        setError('Passwords do not match')
-        return
-      }
-      
-      if (formData.password.length < 6) {
-        setError('Password must be at least 6 characters')
-        return
-      }
+        if (formData.password !== formData.confirmPassword) {
+          setError('Passwords do not match')
+          return
+        }
+        
+        if (formData.password.length < 6) {
+          setError('Password must be at least 6 characters')
+          return
+        }
 
-      const users = JSON.parse(localStorage.getItem('pve:users') || '[]')
-      
-      if (users.find(u => u.email === formData.email)) {
-        setError('Email already exists')
-        return
-      }
+        const response = await apiService.auth.signup(
+          formData.email,
+          formData.password,
+          formData.name
+        )
 
-      const newUser = {
-        id: Date.now().toString(),
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        role: 'user'
-      }
+        if (!response.success) {
+          setError(response.error)
+          return
+        }
 
-      users.push(newUser)
-      localStorage.setItem('pve:users', JSON.stringify(users))
-      localStorage.setItem('pve:currentUser', JSON.stringify(newUser))
-      setUser(newUser)
-      navigate('/')
+        localStorage.setItem('pve:currentUser', JSON.stringify(response.data.user))
+        localStorage.setItem('pve:authToken', response.data.token)
+        setUser(response.data.user)
+        navigate('/')
+      }
+    } catch (err) {
+      setError(err.message || 'An error occurred')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -176,21 +179,13 @@ export default function Login() {
 
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition"
+              disabled={isLoading}
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition disabled:cursor-not-allowed"
             >
-              {isLogin ? 'Login' : 'Sign Up'}
+              {isLoading ? 'Loading...' : (isLogin ? 'Login' : 'Sign Up')}
             </button>
           </form>
 
-          {isLogin && (
-            <div className="mt-6 text-center">
-              <p className="text-sm text-slate-600">
-                Demo credentials: <br />
-                Email: <strong>demo@example.com</strong> <br />
-                Password: <strong>demo123</strong>
-              </p>
-            </div>
-          )}
         </div>
       </div>
     </div>

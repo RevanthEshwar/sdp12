@@ -13,7 +13,6 @@ import useLocalStorage from './hooks/useLocalStorage.js'
 
 export const AppContext = React.createContext()
 
-// Protected Route Component
 function ProtectedRoute({ children }) {
   const currentUser = localStorage.getItem('pve:currentUser')
   return currentUser ? children : <Navigate to="/login" replace />
@@ -24,13 +23,11 @@ export default function App() {
   const location = useLocation()
   const [user, setUser] = useState(null)
 
-  // Check for logged-in user on mount
   useEffect(() => {
     const currentUser = localStorage.getItem('pve:currentUser')
     if (currentUser) {
       setUser(JSON.parse(currentUser))
     } else {
-      // Create demo user if none exists
       const users = JSON.parse(localStorage.getItem('pve:users') || '[]')
       if (users.length === 0) {
         const demoUser = {

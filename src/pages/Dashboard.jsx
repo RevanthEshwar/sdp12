@@ -11,10 +11,10 @@ export default function Dashboard() {
         <p className="text-slate-600">Welcome back to your dashboard</p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4 mb-10">
+      <div className="mb-10">
         <button 
           onClick={() => navigate('/submit')}
-          className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl p-6 flex items-center gap-4 shadow-md transition group"
+          className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl p-6 flex items-center gap-4 shadow-md transition group w-full max-w-md mx-auto"
         >
           <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center text-2xl group-hover:scale-110 transition">
             ➕
@@ -22,19 +22,6 @@ export default function Dashboard() {
           <div className="text-left">
             <h3 className="text-lg font-semibold mb-1">Submit New Property</h3>
             <p className="text-sm text-blue-100">Add another property for recommendations</p>
-          </div>
-        </button>
-
-        <button 
-          onClick={() => navigate('/recommendations')}
-          className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl p-6 flex items-center gap-4 shadow-md transition group"
-        >
-          <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center text-2xl group-hover:scale-110 transition">
-            🎯
-          </div>
-          <div className="text-left">
-            <h3 className="text-lg font-semibold mb-1">View Recommendations</h3>
-            <p className="text-sm text-green-100">See personalized improvement ideas</p>
           </div>
         </button>
       </div>

@@ -1,11 +1,12 @@
 import React from 'react'
+import './FormInput.css'
 
 export default function FormInput({ label, hint, children }) {
   return (
-    <label className="block space-y-1">
-      <span className="text-sm font-medium text-slate-700">{label}</span>
+    <label className="form-input-wrapper">
+      <span className="form-input-label">{label}</span>
       {children}
-      {hint && <span className="text-xs text-slate-500">{hint}</span>}
+      {hint && <span className="form-input-hint">{hint}</span>}
     </label>
   )
 }
