@@ -1,7 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react'
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar.jsx'
-import QuickNav from './components/QuickNav.jsx'
 import Login from './pages/Login.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import UserForm from './pages/UserForm.jsx'
@@ -96,7 +95,6 @@ export default function App() {
             <Route path="/recommendations" element={<ProtectedRoute><Recommendations /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
           </Routes>
-          {showSidebar && <QuickNav />}
         </main>
       </div>
     </AppContext.Provider>

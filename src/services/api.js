@@ -1,6 +1,33 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.example.com'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 const delay = (ms = 500) => new Promise(resolve => setTimeout(resolve, ms))
+
+// Helper function to make API calls
+const apiCall = async (method, endpoint, data = null) => {
+  try {
+    const options = {
+      method,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }
+    
+    if (data) {
+      options.body = JSON.stringify(data)
+    }
+    
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, options)
+    
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.statusText}`)
+    }
+    
+    return await response.json()
+  } catch (error) {
+    console.error('API Call Error:', error)
+    throw error
+  }
+}
 
 export const apiService = {
   auth: {
@@ -73,18 +100,19 @@ export const apiService = {
 
   properties: {
     async create(propertyData) {
-      await delay()
       try {
         const newProperty = {
-          id: Date.now().toString(),
+          id: crypto.randomUUID(),
           ...propertyData,
           createdAt: new Date().toISOString()
         }
+        const data = await apiCall('POST', '/properties', newProperty)
         return {
           success: true,
-          data: newProperty
+          data
         }
       } catch (error) {
+        console.error('Create property error:', error)
         return {
           success: false,
           error: error.message
@@ -93,36 +121,31 @@ export const apiService = {
     },
 
     async getAll() {
-      await delay()
       try {
-        const properties = JSON.parse(localStorage.getItem('pve:properties') || '[]')
+        const data = await apiCall('GET', '/properties')
         return {
           success: true,
-          data: properties
+          data: Array.isArray(data) ? data : []
         }
       } catch (error) {
+        console.error('Get properties error:', error)
         return {
           success: false,
-          error: error.message
+          error: error.message,
+          data: []
         }
       }
     },
 
     async getById(id) {
-      await delay()
       try {
-        const properties = JSON.parse(localStorage.getItem('pve:properties') || '[]')
-        const property = properties.find(p => p.id === id)
-        
-        if (!property) {
-          throw new Error('Property not found')
-        }
-
+        const data = await apiCall('GET', `/properties/${id}`)
         return {
           success: true,
-          data: property
+          data
         }
       } catch (error) {
+        console.error('Get property error:', error)
         return {
           success: false,
           error: error.message
@@ -131,23 +154,14 @@ export const apiService = {
     },
 
     async update(id, updates) {
-      await delay()
       try {
-        const properties = JSON.parse(localStorage.getItem('pve:properties') || '[]')
-        const index = properties.findIndex(p => p.id === id)
-        
-        if (index === -1) {
-          throw new Error('Property not found')
-        }
-
-        properties[index] = { ...properties[index], ...updates }
-        localStorage.setItem('pve:properties', JSON.stringify(properties))
-
+        const data = await apiCall('PUT', `/properties/${id}`, updates)
         return {
           success: true,
-          data: properties[index]
+          data
         }
       } catch (error) {
+        console.error('Update property error:', error)
         return {
           success: false,
           error: error.message
@@ -156,17 +170,14 @@ export const apiService = {
     },
 
     async delete(id) {
-      await delay()
       try {
-        const properties = JSON.parse(localStorage.getItem('pve:properties') || '[]')
-        const filtered = properties.filter(p => p.id !== id)
-        localStorage.setItem('pve:properties', JSON.stringify(filtered))
-
+        await apiCall('DELETE', `/properties/${id}`)
         return {
           success: true,
           data: { id }
         }
       } catch (error) {
+        console.error('Delete property error:', error)
         return {
           success: false,
           error: error.message
@@ -177,40 +188,68 @@ export const apiService = {
 
   recommendations: {
     async getRecommendations(formData) {
-      await delay(800)
       try {
-        const recommendations = [
-          {
-            id: '1',
-            title: 'Modern Kitchen Renovation',
-            description: 'Upgrade to a modern modular kitchen with stainless steel appliances',
-            category: 'Interiors',
-            costRange: { min: 200000, max: 500000 },
-            impact: 'High'
-          },
-          {
-            id: '2',
-            title: 'Smart Home Automation',
-            description: 'Install smart lighting, AC control, and security systems',
-            category: 'Smart Home',
-            costRange: { min: 150000, max: 300000 },
-            impact: 'Medium'
-          },
-          {
-            id: '3',
-            title: 'Solar Panel Installation',
-            description: 'Add solar panels to reduce electricity costs',
-            category: 'Energy',
-            costRange: { min: 300000, max: 600000 },
-            impact: 'High'
-          }
-        ]
-
+        const data = await apiCall('GET', '/recommendations')
         return {
           success: true,
-          data: recommendations
+          data: Array.isArray(data) ? data : []
         }
       } catch (error) {
+        console.error('Get recommendations error:', error)
+        return {
+          success: false,
+          error: error.message,
+          data: []
+        }
+      }
+    },
+
+    async create(recommendationData) {
+      try {
+        const newRecommendation = {
+          id: crypto.randomUUID(),
+          ...recommendationData,
+          createdAt: new Date().toISOString()
+        }
+        const data = await apiCall('POST', '/recommendations', newRecommendation)
+        return {
+          success: true,
+          data
+        }
+      } catch (error) {
+        console.error('Create recommendation error:', error)
+        return {
+          success: false,
+          error: error.message
+        }
+      }
+    },
+
+    async update(id, updates) {
+      try {
+        const data = await apiCall('PUT', `/recommendations/${id}`, updates)
+        return {
+          success: true,
+          data
+        }
+      } catch (error) {
+        console.error('Update recommendation error:', error)
+        return {
+          success: false,
+          error: error.message
+        }
+      }
+    },
+
+    async delete(id) {
+      try {
+        await apiCall('DELETE', `/recommendations/${id}`)
+        return {
+          success: true,
+          data: { id }
+        }
+      } catch (error) {
+        console.error('Delete recommendation error:', error)
         return {
           success: false,
           error: error.message

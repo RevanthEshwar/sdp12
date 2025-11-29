@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react'
 import { AppContext } from '../App.jsx'
 
 export default function UserForm() {
-  const { form, setForm, navigate } = useContext(AppContext)
+  const { form, setForm, navigate, properties, setProperties } = useContext(AppContext)
   const [selectedType, setSelectedType] = useState(form.type || 'Apartment')
 
   const onChange = (e) => {
@@ -26,6 +26,31 @@ export default function UserForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    
+    // Validate required fields
+    if (!form.city || !form.locality || !form.type || !form.rooms || !form.area) {
+      alert('Please fill in all required fields')
+      return
+    }
+
+    // Create a new property object
+    const newProperty = {
+      id: crypto.randomUUID(),
+      city: form.city,
+      locality: form.locality,
+      type: form.type,
+      rooms: form.rooms,
+      area: form.area,
+      amenities: form.amenities || [],
+      currentValue: 0, // Can be updated later
+      potentialIncrease: 0, // Can be updated later
+      createdAt: new Date().toISOString()
+    }
+
+    // Add the property to the properties array
+    setProperties(prev => [newProperty, ...prev])
+
+    // Navigate to recommendations
     navigate('/recommendations')
   }
 

@@ -1,33 +1,99 @@
-import React, { useContext, useState } from 'react'
-import { AppContext } from '../App.jsx'
+import React, { useContext, useState } from 'react';
+import { AppContext } from '../App.jsx';
 
-const emptyIdea = { id: '', title: '', description: '', category: 'Interiors', costRange: { min: 10000, max: 50000 }, tags: [] }
+const emptyIdea = { 
+  id: '', 
+  title: '', 
+  description: '', 
+  category: 'Interiors', 
+  costRange: { min: 10000, max: 50000 }, 
+  tags: [] 
+};
 
 export default function AdminDashboard() {
-  const { ideas, setIdeas } = useContext(AppContext)
-  const [draft, setDraft] = useState(emptyIdea)
+  const { ideas, setIdeas } = useContext(AppContext);
+  const [draft, setDraft] = useState(emptyIdea);
+  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [pendingSubmissions, setPendingSubmissions] = useState([
+    { 
+      id: '1',
+      property: '2BHK Apartment', 
+      size: '1200 sq ft', 
+      owner: 'Priya Sharma', 
+      location: 'Electronic City, Bangalore', 
+      time: '2 hours ago' 
+    },
+    { 
+      id: '2',
+      property: 'Independent House', 
+      size: '2400 sq ft', 
+      owner: 'Amit Kumar', 
+      location: 'Indiranagar, Bangalore', 
+      time: '5 hours ago' 
+    }
+  ]);
+
+  const handleApprove = (id) => {
+    // In a real app, you would make an API call here to update the submission status
+    console.log(`Approved submission ${id}`);
+    setPendingSubmissions(prev => prev.filter(sub => sub.id !== id));
+  };
+
+  const handleReject = (id) => {
+    // In a real app, you would make an API call here to update the submission status
+    console.log(`Rejected submission ${id}`);
+    setPendingSubmissions(prev => prev.filter(sub => sub.id !== id));
+  };
 
   const upsertIdea = (e) => {
-    e.preventDefault()
-    const id = draft.id || crypto.randomUUID()
-    const normalized = { 
-      ...draft, 
-      id, 
-      costRange: { 
-        min: Number(draft.costRange.min), 
-        max: Number(draft.costRange.max) 
-      }, 
-      tags: (draft.tags || []).map(t => String(t).trim()).filter(Boolean) 
+    e.preventDefault();
+    
+    // Validate required fields
+    if (!draft.title?.trim()) {
+      alert('Please enter a title for the recommendation');
+      return;
     }
-    setIdeas((prev) => {
-      const exists = prev.some((p) => p.id === id)
-      return exists ? prev.map((p) => (p.id === id ? normalized : p)) : [normalized, ...prev]
-    })
-    setDraft(emptyIdea)
-  }
+    if (!draft.description?.trim()) {
+      alert('Please enter a description for the recommendation');
+      return;
+    }
 
-  const editIdea = (idea) => setDraft({ ...idea, tags: [...(idea.tags||[])] })
-  const deleteIdea = (id) => setIdeas((prev) => prev.filter((p) => p.id !== id))
+    const id = draft.id || crypto.randomUUID();
+    const newIdea = {
+      id,
+      title: draft.title.trim(),
+      description: draft.description.trim(),
+      category: draft.category || 'Interiors',
+      costRange: {
+        min: Math.max(0, Number(draft.costRange?.min) || 0),
+        max: Math.max(0, Number(draft.costRange?.max) || 0)
+      },
+      tags: Array.isArray(draft.tags) ? draft.tags : []
+    };
+
+    setIdeas(prevIdeas => {
+      const exists = prevIdeas.some(idea => idea.id === id);
+      if (exists) {
+        return prevIdeas.map(idea => 
+          idea.id === id ? newIdea : idea
+        );
+      } else {
+        return [newIdea, ...prevIdeas];
+      }
+    });
+
+    setDraft(emptyIdea);
+    setIsFormVisible(false);
+  };
+
+  const editIdea = (idea) => {
+    setDraft({
+      ...idea,
+      tags: [...(idea.tags || [])]
+    });
+    setIsFormVisible(true);
+  };
+  const deleteIdea = (id) => setIdeas((prev) => prev.filter((p) => p.id !== id));
 
   const getIconForCategory = (category) => {
     const icons = {
@@ -36,9 +102,9 @@ export default function AdminDashboard() {
       'Energy': '⚡',
       'Civil': '🏗️',
       'Maintenance': '🔧'
-    }
-    return icons[category] || '💡'
-  }
+    };
+    return icons[category] || '💡';
+  };
 
   const getColorForCategory = (category) => {
     const colors = {
@@ -47,47 +113,15 @@ export default function AdminDashboard() {
       'Energy': 'bg-green-100',
       'Civil': 'bg-purple-100',
       'Maintenance': 'bg-yellow-100'
-    }
-    return colors[category] || 'bg-slate-100'
-  }
+    };
+    return colors[category] || 'bg-slate-100';
+  };
 
-  const pendingSubmissions = [
-    { property: '2BHK Apartment', size: '1200 sq ft', owner: 'Priya Sharma', location: 'Electronic City, Bangalore', time: '2 hours ago' },
-    { property: 'Independent House', size: '2400 sq ft', owner: 'Amit Kumar', location: 'Indiranagar, Bangalore', time: '5 hours ago' }
-  ]
 
   return (
-    <div className="flex h-screen bg-slate-50">
-      {/* Admin Sidebar */}
-      <aside className="w-56 bg-white border-r border-slate-200">
-        <div className="p-4 border-b border-slate-200 flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500 to-red-600 flex items-center justify-center text-white font-bold text-sm">
-            👨‍💼
-          </div>
-          <span className="font-bold text-sm">Admin Panel</span>
-        </div>
-        <nav className="p-3 space-y-1">
-          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm bg-pink-50 text-pink-700 font-medium">
-            <span>👥</span>
-            <span>Manage Users</span>
-          </button>
-          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50">
-            <span>💡</span>
-            <span>Manage Recommendations</span>
-          </button>
-          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50">
-            <span>🏠</span>
-            <span>Property Listings</span>
-          </button>
-          <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50">
-            <span>📊</span>
-            <span>Analytics</span>
-          </button>
-        </nav>
-      </aside>
-
+    <div className="bg-slate-50 min-h-screen">
       {/* Main Content */}
-      <div className="flex-1 overflow-auto">
+      <div className="overflow-auto">
         <div className="p-8 max-w-7xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-slate-900 mb-2">Admin Dashboard</h1>
@@ -139,10 +173,26 @@ export default function AdminDashboard() {
                       <td className="py-3 px-4 text-sm text-slate-700">{sub.location}</td>
                       <td className="py-3 px-4 text-sm text-slate-600">{sub.time}</td>
                       <td className="py-3 px-4 text-right">
-                        <button className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-sm rounded-md mr-2 transition">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm(`Approve ${sub.property} by ${sub.owner}?`)) {
+                              handleApprove(sub.id);
+                            }
+                          }}
+                          className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-sm rounded-md mr-2 transition"
+                        >
                           Approve
                         </button>
-                        <button className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-md transition">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm(`Reject ${sub.property} by ${sub.owner}?`)) {
+                              handleReject(sub.id);
+                            }
+                          }}
+                          className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-md transition"
+                        >
                           Reject
                         </button>
                       </td>
@@ -158,7 +208,10 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-slate-900">Manage Recommendations</h2>
               <button 
-                onClick={() => setDraft(emptyIdea)}
+                onClick={() => {
+                  setDraft(emptyIdea);
+                  setIsFormVisible(true);
+                }}
                 className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition"
               >
                 Add New Recommendation
@@ -166,7 +219,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Add/Edit Form */}
-            {(draft.id || draft.title) && (
+            {(isFormVisible || draft.id) && (
               <form onSubmit={upsertIdea} className="bg-slate-50 rounded-lg p-6 mb-6 space-y-4">
                 <h3 className="font-semibold text-slate-900">{draft.id ? 'Edit Recommendation' : 'Add New Recommendation'}</h3>
                 <div className="grid md:grid-cols-2 gap-4">
@@ -182,7 +235,7 @@ export default function AdminDashboard() {
                     value={draft.category} 
                     onChange={(e) => setDraft({ ...draft, category: e.target.value })}
                   >
-                    {['Interiors','Civil','Energy','Maintenance','Smart Home'].map(c => <option key={c}>{c}</option>)}
+                    {['Interiors','Civil','Energy','Maintenance','Smart Home'].map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <textarea 
@@ -212,10 +265,20 @@ export default function AdminDashboard() {
                   />
                 </div>
                 <div className="flex gap-3 justify-end">
-                  <button type="button" onClick={() => setDraft(emptyIdea)} className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 transition">
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      setDraft(emptyIdea);
+                      setIsFormVisible(false);
+                    }} 
+                    className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 transition"
+                  >
                     Cancel
                   </button>
-                  <button className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition" type="submit">
+                  <button 
+                    type="submit" 
+                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition"
+                  >
                     {draft.id ? 'Update' : 'Add'} Recommendation
                   </button>
                 </div>
@@ -225,8 +288,8 @@ export default function AdminDashboard() {
             {/* Recommendations Grid */}
             <div className="grid md:grid-cols-3 gap-4">
               {ideas.map((idea) => {
-                const bgColor = getColorForCategory(idea.category)
-                const icon = getIconForCategory(idea.category)
+                const bgColor = getColorForCategory(idea.category);
+                const icon = getIconForCategory(idea.category);
                 return (
                   <div key={idea.id} className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-md transition">
                     <div className={`${bgColor} h-32 flex items-center justify-center text-5xl`}>
@@ -254,12 +317,12 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   </div>
-                )
+                );
               })}
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
